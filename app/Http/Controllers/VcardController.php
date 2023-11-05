@@ -38,7 +38,9 @@ class VcardController extends Controller
      */
     public function update(Request $request, Vcard $vcard)
     {
-        //
+        $vcard->fill($request->all());
+        $vcard->save();
+        return new VcardResource($vcard);
     }
 
     /**
@@ -46,6 +48,14 @@ class VcardController extends Controller
      */
     public function destroy(Vcard $vcard)
     {
-        //
+        $vcard->delete();
+        return new VcardResource($vcard);
+    }
+
+    public function updateBlocked(Request $request, Vcard $vcard)
+    {
+        $vcard->blocked = $request->blocked;
+        $vcard->save();
+        return new VcardResource($vcard);
     }
 }
