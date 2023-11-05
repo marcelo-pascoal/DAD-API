@@ -15,7 +15,7 @@ class VcardResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'photo_url' => $this->photo_url,
-            'blocked' => $this->blocked,
+            'blocked' => $this->blocked ? true : false,
             'balance' => $this->balance,
             'max_debit' => $this->max_debit,
         ];
