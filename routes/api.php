@@ -22,9 +22,9 @@ Route::middleware('auth:api')->group(function () {
         ->middleware('can:update,user');
     Route::patch('users/{user}/password', [UserController::class, 'update_password'])
         ->middleware('can:updatePassword,user');
+
+
+    Route::apiResource('vcards', VcardController::class);
+    Route::apiResource('users', UserController::class);
+    Route::apiResource('categories', CategoryController::class);
 });
-
-
-Route::apiResource('vcards', VcardController::class);
-Route::apiResource('users', UserController::class);
-Route::apiResource('categories', CategoryController::class);

@@ -19,11 +19,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        /*
-        'gender',
         'photo_url',
-        'type'
-        */
+        'user_type'
     ];
 
     /**
@@ -50,6 +47,10 @@ class User extends Authenticatable
         return $this->where('username', $username)->first();
     }
 
+    public function categories()
+    {
+        return $this->hasMany(Category::class, 'vcard');
+    }
     /*
     public function getGenderNameAttribute()
     {

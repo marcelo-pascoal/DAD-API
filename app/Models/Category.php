@@ -19,4 +19,9 @@ class Category extends Model
         'type',
         'name',
     ];
+
+    public function responsible()
+    {
+        return $this->belongsTo(User::class, 'vcard');
+    }
 }
