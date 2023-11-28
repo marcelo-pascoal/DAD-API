@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\UserController;
 use App\Http\Controllers\VcardController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\TransactionController;
 
 Route::post('login', [AuthController::class, 'login']);
 
@@ -27,4 +28,5 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('vcards', VcardController::class);
     Route::apiResource('users', UserController::class);
     Route::apiResource('categories', CategoryController::class);
+    Route::apiResource('transactions', TransactionController::class);
 });

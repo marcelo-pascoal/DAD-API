@@ -51,6 +51,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(Category::class, 'vcard');
     }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, 'vcard');
+    }
     /*
     public function getGenderNameAttribute()
     {
