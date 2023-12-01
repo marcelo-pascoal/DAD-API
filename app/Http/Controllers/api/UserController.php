@@ -11,12 +11,14 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Http\Requests\UpdateUserPasswordRequest;
 use Illuminate\Support\Facades\Storage;
 use App\Services\Base64Services;
+use Illuminate\Support\Str;
+
 class UserController extends Controller
 {
     private function storeBase64AsFile(User $user, String $base64String)
     {
         $targetDir = storage_path('app/public/fotos');
-        $newfilename = $user->id . "_" . rand(1000,9999);
+        $newfilename = $user->id . "_" . rand(1000, 9999);
         $base64Service = new Base64Services();
         return $base64Service->saveFile($base64String, $targetDir, $newfilename);
     }
@@ -35,22 +37,12 @@ class UserController extends Controller
     public function store(StoreUserRequest $request)
     {
         $dataToSave = $request->validated();
-
-        $base64ImagePhoto = array_key_exists("base64ImagePhoto", $dataToSave) ?
-            $dataToSave["base64ImagePhoto"] : ($dataToSave["base64ImagePhoto"] ?? null);
-        unset($dataToSave["base64ImagePhoto"]);
-
         $user = new User();
         $user->name = $dataToSave['name'];
         $user->email = $dataToSave['email'];
-        $user->type = 'M';
-        $user->gender = $dataToSave['gender'];
         $user->password = bcrypt($dataToSave['password']);
+        $user->remember_token = Str::random(10);
 
-        // Create a new photo file from base64 content
-        if ($base64ImagePhoto) {
-            $user->photo_url = $this->storeBase64AsFile($user, $base64ImagePhoto);
-        }
         $user->save();
         return new UserResource($user);
     }

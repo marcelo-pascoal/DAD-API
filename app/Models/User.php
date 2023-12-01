@@ -19,8 +19,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'photo_url',
-        'user_type'
     ];
 
     /**
@@ -41,6 +39,13 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+
+    public function save(array $options = [])
+    {
+        $this->setTable('users');
+        return parent::save($options);
+    }
 
     public function findForPassport(string $username): User
     {
