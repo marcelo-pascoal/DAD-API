@@ -9,20 +9,10 @@ use App\Models\User;
 use App\Http\Resources\UserResource;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Requests\UpdateUserPasswordRequest;
-use Illuminate\Support\Facades\Storage;
-use App\Services\Base64Services;
 use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
-    private function storeBase64AsFile(User $user, String $base64String)
-    {
-        $targetDir = storage_path('app/public/fotos');
-        $newfilename = $user->id . "_" . rand(1000, 9999);
-        $base64Service = new Base64Services();
-        return $base64Service->saveFile($base64String, $targetDir, $newfilename);
-    }
-
     public function index()
     {
         return UserResource::collection(User::where('user_type', 'A')->get());

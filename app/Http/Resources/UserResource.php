@@ -14,11 +14,18 @@ class UserResource extends JsonResource
      */
     public function toArray($request)
     {
-        return [
+        $userToArray = [
             'id' => $this->id,
             'user_type' => $this->user_type,
             'name' => $this->name,
             'email' => $this->email,
         ];
+
+        // Check if user type is 'V' before adding 'photo_url'
+        if ($this->user_type == 'V') {
+            $userToArray['photo_url'] = $this->photo_url;
+        }
+
+        return $userToArray;
     }
 }

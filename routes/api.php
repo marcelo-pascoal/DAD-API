@@ -4,7 +4,7 @@ use App\Http\Controllers\api\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\UserController;
 use App\Http\Controllers\VcardController;
-use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\api\CategoryController;
 use App\Http\Controllers\TransactionController;
 
 Route::post('login', [AuthController::class, 'login']);
