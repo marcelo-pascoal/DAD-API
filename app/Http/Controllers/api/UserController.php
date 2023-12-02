@@ -51,26 +51,8 @@ class UserController extends Controller
     {
         $dataToSave = $request->validated();
 
-        $base64ImagePhoto = array_key_exists("base64ImagePhoto", $dataToSave) ?
-            $dataToSave["base64ImagePhoto"] : ($dataToSave["base64ImagePhoto"] ?? null);
-        $deletePhotoOnServer = array_key_exists("deletePhotoOnServer", $dataToSave) && $dataToSave["deletePhotoOnServer"];
-        unset($dataToSave["base64ImagePhoto"]);
-        unset($dataToSave["deletePhotoOnServer"]);
-
         $user->fill($dataToSave);
 
-        // Delete previous photo file if a new file is uploaded or the photo is to be deleted
-        if ($user->photo_url && ($deletePhotoOnServer || $base64ImagePhoto)) {
-            if (Storage::exists('public/fotos/' . $user->photo_url)) {
-                Storage::delete('public/fotos/' . $user->photo_url);
-            }
-            $user->photo_url = null;
-        }
-
-        // Create a new photo file from base64 content
-        if ($base64ImagePhoto) {
-            $user->photo_url = $this->storeBase64AsFile($user, $base64ImagePhoto);
-        }
         $user->save();
         return new UserResource($user);
     }
@@ -85,5 +67,16 @@ class UserController extends Controller
     public function show_me(Request $request)
     {
         return new UserResource($request->user());
+    }
+
+    public function destroy(User $user)
+    {
+        $userToDelete = User::find($user->id);
+        if (!$userToDelete) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+        $userToDelete->delete();
+
+        return new UserResource($userToDelete);
     }
 }

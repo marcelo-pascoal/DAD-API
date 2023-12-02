@@ -47,6 +47,13 @@ class User extends Authenticatable
         return parent::save($options);
     }
 
+    public function delete()
+    {
+        $this->setTable('users');
+        $deleted = parent::delete();
+        return $deleted;
+    }
+
     public function findForPassport(string $username): User
     {
         return $this->where('username', $username)->first();
