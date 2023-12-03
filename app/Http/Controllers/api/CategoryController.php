@@ -8,6 +8,7 @@ use App\Models\DefaultCategory;
 use App\Http\Resources\CategoryResource;
 use App\Http\Requests\UpdateCategoryRequest;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Vcard;
 
 class CategoryController extends Controller
 {
@@ -18,7 +19,8 @@ class CategoryController extends Controller
     {
         $user = Auth::user();
         if ($user && $user->user_type === 'V') {
-            return CategoryResource::collection($user->categories);
+            $vcard = Vcard::where('phone_number', $user->id)->firstOrFail();
+            return CategoryResource::collection($vcard->categories);
         }
         return CategoryResource::collection(DefaultCategory::all());
     }

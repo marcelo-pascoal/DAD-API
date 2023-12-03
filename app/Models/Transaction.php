@@ -27,6 +27,7 @@ class Transaction extends Model
 
     public function responsible()
     {
-        return $this->belongsTo(User::class, 'vcard');
+        return $this->belongsTo(Vcard::class, 'vcard');
     }
+    
 }

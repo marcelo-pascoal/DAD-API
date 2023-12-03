@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\api;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use App\Http\Resources\TransactionResource;
+use App\Models\Vcard;
 
 class TransactionController extends Controller
 {
@@ -15,7 +17,8 @@ class TransactionController extends Controller
     public function index()
     {
         $user = Auth::user();
-        return TransactionResource::collection($user->transactions);
+        $vcard = Vcard::where('phone_number', $user->id)->firstOrFail();
+        return TransactionResource::collection($vcard->transactions);
     }
 
     /**

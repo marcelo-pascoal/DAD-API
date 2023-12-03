@@ -38,6 +38,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'password' => 'hashed',
     ];
 
 
@@ -57,15 +58,5 @@ class User extends Authenticatable
     public function findForPassport(string $username): User
     {
         return $this->where('username', $username)->first();
-    }
-
-    public function categories()
-    {
-        return $this->hasMany(Category::class, 'vcard');
-    }
-
-    public function transactions()
-    {
-        return $this->hasMany(Transaction::class, 'vcard');
     }
 }
