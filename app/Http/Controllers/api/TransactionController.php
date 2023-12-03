@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class TransactionController extends Controller
 {
@@ -39,6 +40,10 @@ class TransactionController extends Controller
                 $requestTransaction->vcard = $vcard->phone_number;
                 $requestTransaction->date = $time->toDateString();
                 $requestTransaction->datetime = $time->toDateTimeString();
+                $requestTransaction->old_balance = $vcard->balance;
+                $requestTransaction->new_balance = $vcard->balance =
+                    (string)((float) $vcard->balance - (float) $requestTransaction->value);
+
                 switch ($requestTransaction->payment_type) {
                     case 'VCARD':
                         $pairVcard = Vcard::where('phone_number', $requestTransaction->payment_reference)->firstOrFail();
@@ -48,29 +53,41 @@ class TransactionController extends Controller
                         $pairTransaction->vcard = $pairVcard->phone_number;
                         $pairTransaction->date = $time->toDateString();
                         $pairTransaction->datetime = $time->toDateTimeString();
-
-                        $requestTransaction->old_balance = $vcard->balance;
-                        $requestTransaction->new_balance = $vcard->balance =
-                            (string)((float) $vcard->balance - (float) $requestTransaction->value);
                         $pairTransaction->old_balance = $pairVcard->balance;
                         $pairTransaction->new_balance = $pairVcard->balance =
                             (string)((float) $pairVcard->balance + (float) $requestTransaction->value);
-
-                        $requestTransaction->pair_vcard = $pairTransaction->vcard;
                         $pairTransaction->pair_vcard = $requestTransaction->vcard;
-
-                        $requestTransaction->save();
                         $pairTransaction->save();
-                        $vcard->save();
-                        $pairVcard->save();
-
                         $requestTransaction->pair_transaction = $pairTransaction->id;
-                        $pairTransaction->pair_transaction = $requestTransaction->id;
-
+                        $requestTransaction->pair_vcard = $pairTransaction->vcard;
                         $requestTransaction->save();
+                        $pairTransaction->pair_transaction = $requestTransaction->id;
                         $pairTransaction->save();
+                        $pairVcard->save();
+                        break;
+                    default:
+                        $debitResponse = Http::post('https://dad-202324-payments-api.vercel.app/api/debit', [
+                            'type' =>  $requestTransaction->payment_type,
+                            'reference' => $requestTransaction->payment_reference,
+                            'value' => $requestTransaction->value
+                        ]);
+                        if (!$debitResponse->successful()) {
+                            return $debitResponse;
+                        }
+                        break;
+                }
+            } else {
+                $creditResponse = Http::post('https://dad-202324-payments-api.vercel.app/api/credit', [
+                    'type' =>  $requestTransaction->payment_type,
+                    'reference' => $requestTransaction->payment_reference,
+                    'value' => $requestTransaction->value
+                ]);
+                if (!$creditResponse->successful()) {
+                    return $creditResponse;
                 }
             }
+            $requestTransaction->save();
+            $vcard->save();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
