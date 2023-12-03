@@ -2,31 +2,81 @@
 
 namespace App\Http\Controllers\api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Transaction;
-use Illuminate\Http\Request;
-use App\Http\Resources\TransactionResource;
 use App\Models\Vcard;
+use App\Models\Transaction;
+
+use App\Http\Controllers\Controller;
+use App\Http\Resources\TransactionResource;
+use App\Http\Resources\FullTransactionResource;
+use App\Http\Requests\StoreUpdateTransactionRequest;
+
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
         $user = Auth::user();
-        $vcard = Vcard::where('phone_number', $user->id)->firstOrFail();
-        return TransactionResource::collection($vcard->transactions);
+        $vcard = $user->vcard;
+        return TransactionResource::collection($vcard->transactions()->orderBy('datetime', 'desc')->get());
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreUpdateTransactionRequest $request)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $validData = $request->validated();
+            $user = Auth::user();
+            $vcard = $user->vcard;
+            $time = Carbon::now();
+            $requestTransaction = Transaction::make($validData);
+
+            if ($user && $user->user_type === 'V') {
+                $requestTransaction->vcard = $vcard->phone_number;
+                $requestTransaction->date = $time->toDateString();
+                $requestTransaction->datetime = $time->toDateTimeString();
+                switch ($requestTransaction->payment_type) {
+                    case 'VCARD':
+                        $pairVcard = Vcard::where('phone_number', $requestTransaction->payment_reference)->firstOrFail();
+                        unset($validData['category_id']);
+                        unset($validData['description']);
+                        $pairTransaction = Transaction::make($validData);
+                        $pairTransaction->vcard = $pairVcard->phone_number;
+                        $pairTransaction->date = $time->toDateString();
+                        $pairTransaction->datetime = $time->toDateTimeString();
+
+                        $requestTransaction->old_balance = $vcard->balance;
+                        $requestTransaction->new_balance = $vcard->balance =
+                            (string)((float) $vcard->balance - (float) $requestTransaction->value);
+                        $pairTransaction->old_balance = $pairVcard->balance;
+                        $pairTransaction->new_balance = $pairVcard->balance =
+                            (string)((float) $pairVcard->balance + (float) $requestTransaction->value);
+
+                        $requestTransaction->pair_vcard = $pairTransaction->vcard;
+                        $pairTransaction->pair_vcard = $requestTransaction->vcard;
+
+                        $requestTransaction->save();
+                        $pairTransaction->save();
+                        $vcard->save();
+                        $pairVcard->save();
+
+                        $requestTransaction->pair_transaction = $pairTransaction->id;
+                        $pairTransaction->pair_transaction = $requestTransaction->id;
+
+                        $requestTransaction->save();
+                        $pairTransaction->save();
+                }
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+        return new FullTransactionResource($requestTransaction);
     }
 
     /**
@@ -34,7 +84,7 @@ class TransactionController extends Controller
      */
     public function show(Transaction $transaction)
     {
-        //
+        return new FullTransactionResource($transaction);
     }
 
     /**

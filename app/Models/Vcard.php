@@ -34,7 +34,13 @@ class Vcard extends Model
         'password' => 'hashed',
         'remember_token' => 'hashed',
     ];
-        public function categories()
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'phone_number');
+    }
+
+    public function categories()
     {
         return $this->hasMany(Category::class, 'vcard');
     }

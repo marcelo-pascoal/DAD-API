@@ -59,4 +59,9 @@ class User extends Authenticatable
     {
         return $this->where('username', $username)->first();
     }
+
+    public function vcard()
+    {
+        return $this->hasOne(Vcard::class, 'phone_number');
+    }
 }
