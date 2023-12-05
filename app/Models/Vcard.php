@@ -10,9 +10,10 @@ class Vcard extends Model
 {
     use HasFactory, SoftDeletes;
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $primaryKey = 'phone_number';
+    public $incrementing = false;
 
     protected $fillable = [
         'phone_number',
@@ -37,7 +38,7 @@ class Vcard extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'phone_number');
+        return $this->belongsTo(User::class, 'phone_number', 'id');
     }
 
     public function categories()

@@ -30,3 +30,5 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('transactions', TransactionController::class);
 });
+
+Route::post('vcards', [VcardController::class, 'store']);

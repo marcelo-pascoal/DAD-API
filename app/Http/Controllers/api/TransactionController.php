@@ -32,7 +32,7 @@ class TransactionController extends Controller
         try {
             $validData = $request->validated();
             $user = Auth::user();
-            $vcard = $user->vcard;
+            $vcard = $user->vcard->lockForUpdate()->firstOrFail();
             $time = Carbon::now();
             $requestTransaction = Transaction::make($validData);
 
@@ -46,7 +46,7 @@ class TransactionController extends Controller
 
                 switch ($requestTransaction->payment_type) {
                     case 'VCARD':
-                        $pairVcard = Vcard::where('phone_number', $requestTransaction->payment_reference)->firstOrFail();
+                        $pairVcard = Vcard::where('phone_number', $requestTransaction->payment_reference)->lockForUpdate()->firstOrFail();
                         unset($validData['category_id']);
                         unset($validData['description']);
                         $pairTransaction = Transaction::make($validData);
@@ -72,6 +72,7 @@ class TransactionController extends Controller
                             'value' => $requestTransaction->value
                         ]);
                         if (!$debitResponse->successful()) {
+                            DB::rollback();
                             return $debitResponse;
                         }
                         break;
@@ -83,6 +84,7 @@ class TransactionController extends Controller
                     'value' => $requestTransaction->value
                 ]);
                 if (!$creditResponse->successful()) {
+                    DB::rollback();
                     return $creditResponse;
                 }
             }

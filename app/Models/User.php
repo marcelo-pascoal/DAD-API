@@ -62,6 +62,6 @@ class User extends Authenticatable
 
     public function vcard()
     {
-        return $this->hasOne(Vcard::class, 'phone_number');
+        return $this->hasOne(Vcard::class, 'phone_number', 'id');
     }
 }
