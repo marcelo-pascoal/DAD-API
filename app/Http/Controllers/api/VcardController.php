@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\api;
 
+use App\Models\Category;
+use App\Models\DefaultCategory;
 use App\Http\Controllers\Controller;
 use App\Models\Vcard;
 use Illuminate\Http\Request;
 use App\Http\Resources\VcardResource;
-use App\Http\Resources\UserResource;
 use App\Services\Base64Services;
 use App\Http\Requests\StoreVcardRequest;
 
@@ -19,26 +20,19 @@ class VcardController extends Controller
         $base64Service = new Base64Services();
         return $base64Service->saveFile($base64String, $targetDir, $newfilename);
     }
-    /**
-     * Display a listing of the resource.
-     */
+    
     public function index()
     {
         $vcards = Vcard::all();
         return VcardResource::collection($vcards);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreVcardRequest $request)
     {
         $dataToSave = $request->validated();
-
         $base64ImagePhoto = array_key_exists("base64ImagePhoto", $dataToSave) ?
             $dataToSave["base64ImagePhoto"] : ($dataToSave["base64ImagePhoto"] ?? null);
         unset($dataToSave["base64ImagePhoto"]);
-
         $vcard = new Vcard();
         $vcard->phone_number = $dataToSave['phone_number'];
         $vcard->name = $dataToSave['name'];
@@ -47,27 +41,28 @@ class VcardController extends Controller
         $vcard->confirmation_code = bcrypt($dataToSave['confirmation_code']);
         $vcard->blocked = 0;
         $vcard->balance = 0;
-        $vcard->max_debit = 500;
-
-        // Create a new photo file from base64 content
+        $vcard->max_debit = 5000;
         if ($base64ImagePhoto) {
             $vcard->photo_url = $this->storeBase64AsFile($vcard, $base64ImagePhoto);
         }
         $vcard->save();
+
+        $defaultCategories = DefaultCategory::all();
+        foreach ($defaultCategories as $defaultCategory) {
+            $newCategory = new Category();
+            $newCategory->name = $defaultCategory->name;
+            $newCategory->type = $defaultCategory->type;
+            $newCategory->vcard = $dataToSave['phone_number'];
+            $newCategory->save();
+        }
         return new VcardResource($vcard);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Vcard $vcard)
     {
         return new VcardResource($vcard);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Vcard $vcard)
     {
         $vcard->fill($request->all());
@@ -75,9 +70,6 @@ class VcardController extends Controller
         return new VcardResource($vcard);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Vcard $vcard)
     {
         $vcard->delete();
