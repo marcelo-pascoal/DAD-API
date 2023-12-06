@@ -12,9 +12,6 @@ use App\Models\Vcard;
 
 class CategoryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $user = Auth::user();
@@ -25,9 +22,6 @@ class CategoryController extends Controller
         return CategoryResource::collection(DefaultCategory::all());
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(UpdateCategoryRequest $request)
     {
         $dataToSave = $request->validated();
@@ -47,9 +41,6 @@ class CategoryController extends Controller
         return new CategoryResource($storedCategory);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateCategoryRequest $request, DefaultCategory $category)
     {
         $dataToSave = $request->validated();
@@ -64,9 +55,6 @@ class CategoryController extends Controller
         return new CategoryResource($updatedCategory);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(DefaultCategory $category)
     {
         $user = Auth::user();

@@ -23,7 +23,6 @@ class UserController extends Controller
         return new UserResource($user);
     }
 
-    // REGISTRATION - CREATES A NEW USER
     public function store(StoreUserRequest $request)
     {
         $dataToSave = $request->validated();

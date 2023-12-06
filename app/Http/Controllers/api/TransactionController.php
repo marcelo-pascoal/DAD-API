@@ -36,16 +36,25 @@ class TransactionController extends Controller
             $time = Carbon::now();
             $requestTransaction = Transaction::make($validData);
 
-            if ($user && $user->user_type === 'V') {
-                $requestTransaction->vcard = $vcard->phone_number;
-                $requestTransaction->date = $time->toDateString();
-                $requestTransaction->datetime = $time->toDateTimeString();
-                $requestTransaction->old_balance = $vcard->balance;
-                $requestTransaction->new_balance = $vcard->balance =
-                    (string)((float) $vcard->balance - (float) $requestTransaction->value);
+            //DEVOLVER ERRO -> APRESENTAR TOAST NA APP
+            if ($vcard->balance < $requestTransaction->value) {
+                return response()->json('Transaction value exceeds vcard balance!', 401);
+            } else if ($vcard->max_debit < $requestTransaction->value) {
+                return response()->json('Transaction value exceeds vcard maximum debit value!', 401);
+            }
+            $requestTransaction->vcard = $vcard->phone_number;
+            $requestTransaction->date = $time->toDateString();
+            $requestTransaction->datetime = $time->toDateTimeString();
+            $requestTransaction->old_balance = $vcard->balance;
+            $requestTransaction->new_balance = $vcard->balance =
+                (string)((float) $vcard->balance - (float) $requestTransaction->value);
 
+            if ($user && $user->user_type === 'V') {
                 switch ($requestTransaction->payment_type) {
                     case 'VCARD':
+                        if(Vcard::where('phone_number', $requestTransaction->payment_reference)->exists()){
+                            return response()->json('Target vcard does not exist!', 401);
+                        }
                         $pairVcard = Vcard::where('phone_number', $requestTransaction->payment_reference)->lockForUpdate()->firstOrFail();
                         unset($validData['category_id']);
                         unset($validData['description']);
@@ -98,25 +107,16 @@ class TransactionController extends Controller
         return new FullTransactionResource($requestTransaction);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Transaction $transaction)
     {
         return new FullTransactionResource($transaction);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Transaction $transaction)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Transaction $transaction)
     {
         //

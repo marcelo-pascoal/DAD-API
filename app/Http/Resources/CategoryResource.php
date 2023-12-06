@@ -15,7 +15,6 @@ class CategoryResource extends JsonResource
             'name' => $this->name,
         ];
 
-        // Check if 'type' is not null before adding it to the response
         if ($this->type !== null) {
             $data['type'] = $this->type;
         }

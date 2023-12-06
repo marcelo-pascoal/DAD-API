@@ -6,12 +6,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class UserResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
-     */
     public function toArray($request)
     {
         $userToArray = [
@@ -21,7 +15,6 @@ class UserResource extends JsonResource
             'email' => $this->email,
         ];
 
-        // Check if user type is 'V' before adding 'photo_url'
         if ($this->user_type == 'V') {
             $userToArray['photo_url'] = $this->photo_url;
         }
