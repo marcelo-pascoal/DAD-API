@@ -32,3 +32,4 @@ Route::middleware('auth:api')->group(function () {
 });
 
 Route::post('vcards', [VcardController::class, 'store']);
+Route::patch('vcards/{vcard}/blocked', [VcardController::class, 'updateBlocked']);
