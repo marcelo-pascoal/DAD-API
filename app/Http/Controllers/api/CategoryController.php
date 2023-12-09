@@ -52,7 +52,10 @@ class CategoryController extends Controller
         } else {
             $updatedCategory = DefaultCategory::find($category->id);
         }
-        $updatedCategory->fill($dataToSave);
+
+        $updatedCategory->name = $dataToSave['name'];
+        $updatedCategory->type = $dataToSave['type'];
+        $updatedCategory->custom_data = json_encode(["icon" => $dataToSave['icon']]);
         $updatedCategory->save();
         return new CategoryResource($updatedCategory);
     }
