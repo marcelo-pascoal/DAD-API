@@ -11,12 +11,16 @@ class CategoryResource extends JsonResource
     {
         $data = [
             'id' => $this->id,
-            'vcard' => $this->vcard,
+            'type' => $this->type,
             'name' => $this->name,
         ];
 
-        if ($this->type !== null) {
-            $data['type'] = $this->type;
+        if ($this->custom_data !== null) {
+            $data['icon'] = json_decode($this->custom_data)->icon;
+        }
+
+        if ($this->vcard !== null) {
+            $data['vcard'] = $this->vcard;
         }
 
         return $data;

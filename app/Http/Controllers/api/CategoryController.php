@@ -36,6 +36,8 @@ class CategoryController extends Controller
 
         $storedCategory->name = $dataToSave['name'];
         $storedCategory->type = $dataToSave['type'];
+        $storedCategory->custom_data = json_encode(["icon" => $dataToSave['icon']]);
+
 
         $storedCategory->save();
         return new CategoryResource($storedCategory);
@@ -55,15 +57,20 @@ class CategoryController extends Controller
         return new CategoryResource($updatedCategory);
     }
 
-    public function destroy(DefaultCategory $category)
+    public function destroy(Category $category)
     {
-        $user = Auth::user();
-        if ($user && $user->user_type === 'V') {
-            $deletedCategory = Category::find($category->id);
-        } else {
-            $deletedCategory = DefaultCategory::find($category->id);
+        $deletedCategory = Category::find($category->id);
+        if (!$deletedCategory) {
+            return response()->json(['error' => 'Category not found'], 404);
         }
+        $deletedCategory->delete();
 
+        return new CategoryResource($deletedCategory);
+    }
+
+    public function destroyDefault(DefaultCategory $category)
+    {
+        $deletedCategory = DefaultCategory::find($category->id);
         if (!$deletedCategory) {
             return response()->json(['error' => 'Category not found'], 404);
         }

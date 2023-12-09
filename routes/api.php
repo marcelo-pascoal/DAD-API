@@ -27,9 +27,18 @@ Route::middleware('auth:api')->group(function () {
 
     Route::apiResource('vcards', VcardController::class);
     Route::apiResource('users', UserController::class);
-    Route::apiResource('categories', CategoryController::class);
     Route::apiResource('transactions', TransactionController::class);
+
+    Route::get('categories', [CategoryController::class, 'index']);
+
+    Route::middleware(['check.user.admin'])->group(function () {
+        Route::delete('categories/{category}', [CategoryController::class, 'destroyDefault']);
+    });
+    Route::delete('categories/{category}', [CategoryController::class, 'destroy']);
+    Route::post('categories', [CategoryController::class, 'store']);
+    Route::put('categories/{category}', [CategoryController::class, 'update']);
 });
+
 
 Route::post('vcards', [VcardController::class, 'store']);
 Route::patch('vcards/{vcard}/blocked', [VcardController::class, 'updateBlocked']);

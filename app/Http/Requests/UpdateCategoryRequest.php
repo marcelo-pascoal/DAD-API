@@ -16,6 +16,7 @@ class UpdateCategoryRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'type' => 'required|in:D,C',
+            'icon' => 'required|string|max:255'
         ];
     }
 }
