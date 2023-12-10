@@ -32,9 +32,11 @@ class TransactionController extends Controller
         try {
             $validData = $request->validated();
             $user = Auth::user();
-            $vcard = $user->vcard->lockForUpdate()->firstOrFail();
             $time = Carbon::now();
             $requestTransaction = Transaction::make($validData);
+            if ($user && $user->user_type === 'V') {
+                $vcard = $user->vcard->lockForUpdate()->firstOrFail();
+            } else $vcard = Vcard::find($requestTransaction->payment_reference);
 
             //DEVOLVER ERRO -> APRESENTAR TOAST NA APP
             if ($vcard->balance < $requestTransaction->value) {
@@ -52,7 +54,7 @@ class TransactionController extends Controller
             if ($user && $user->user_type === 'V') {
                 switch ($requestTransaction->payment_type) {
                     case 'VCARD':
-                        if(Vcard::where('phone_number', $requestTransaction->payment_reference)->exists()){
+                        if (Vcard::where('phone_number', $requestTransaction->payment_reference)->exists()) {
                             return response()->json('Target vcard does not exist!', 401);
                         }
                         $pairVcard = Vcard::where('phone_number', $requestTransaction->payment_reference)->lockForUpdate()->firstOrFail();
@@ -112,9 +114,14 @@ class TransactionController extends Controller
         return new FullTransactionResource($transaction);
     }
 
-    public function update(Request $request, Transaction $transaction)
+    public function update(StoreUpdateTransactionRequest $request, Transaction $transaction)
     {
-        //
+        $dataToSave = $request->validated();
+
+        $transaction->fill($dataToSave);
+
+        $transaction->save();
+        return new TransactionResource($transaction);
     }
 
     public function destroy(Transaction $transaction)
