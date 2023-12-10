@@ -36,8 +36,7 @@ class TransactionController extends Controller
             $requestTransaction = Transaction::make($validData);
             if ($user && $user->user_type === 'V') {
                 $vcard = $user->vcard->lockForUpdate()->firstOrFail();
-            } else $vcard = Vcard::find($requestTransaction->payment_reference);
-
+            } else $vcard = Vcard::find($requestTransaction->vcard);
             //DEVOLVER ERRO -> APRESENTAR TOAST NA APP
             if ($vcard->balance < $requestTransaction->value) {
                 return response()->json('Transaction value exceeds vcard balance!', 401);

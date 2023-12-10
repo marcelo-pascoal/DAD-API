@@ -15,6 +15,7 @@ class StoreUpdateTransactionRequest extends FormRequest
     public function rules()
     {
         return [
+            'vcard' => 'required',
             'type' => 'required',
             'value' => 'required',
             'payment_type' => 'required|in:VCARD,MBWAY,PAYPAL,IBAN,MB,VISA',
