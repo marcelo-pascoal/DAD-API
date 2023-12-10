@@ -29,12 +29,12 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('users', UserController::class);
     Route::apiResource('transactions', TransactionController::class);
 
+
     Route::get('categories', [CategoryController::class, 'index']);
 
-    Route::middleware(['check.user.admin'])->group(function () {
-        Route::delete('categories/{category}', [CategoryController::class, 'destroyDefault']);
-    });
+    Route::delete('categories/default/{category}', [CategoryController::class, 'destroyDefault']);
     Route::delete('categories/{category}', [CategoryController::class, 'destroy']);
+
     Route::post('categories', [CategoryController::class, 'store']);
     Route::put('categories/{category}', [CategoryController::class, 'update']);
 });
