@@ -47,9 +47,13 @@ class TransactionController extends Controller
             $requestTransaction->date = $time->toDateString();
             $requestTransaction->datetime = $time->toDateTimeString();
             $requestTransaction->old_balance = $vcard->balance;
-            $requestTransaction->new_balance = $vcard->balance =
-                (string)((float) $vcard->balance - (float) $requestTransaction->value);
-
+            if ($user && $user->user_type === 'V') {
+                $requestTransaction->new_balance = $vcard->balance =
+                    (string)((float) $vcard->balance - (float) $requestTransaction->value);
+            } else {
+                $requestTransaction->new_balance = $vcard->balance =
+                    (string)((float) $vcard->balance + (float) $requestTransaction->value);
+            }
             if ($user && $user->user_type === 'V') {
                 switch ($requestTransaction->payment_type) {
                     case 'VCARD':
