@@ -37,6 +37,8 @@ Route::middleware('auth:api')->group(function () {
 
     Route::post('categories', [CategoryController::class, 'store']);
     Route::put('categories/{category}', [CategoryController::class, 'update']);
+
+    Route::patch('vcards/{vcard}/confirmation_code', [VcardController::class, 'update_confirmation_code']);
 });
 
 

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\VcardResource;
 use App\Services\Base64Services;
 use App\Http\Requests\StoreVcardRequest;
+use App\Http\Requests\UpdateUserCodeRequest;
 
 class VcardController extends Controller
 {
@@ -55,6 +56,13 @@ class VcardController extends Controller
             $newCategory->vcard = $dataToSave['phone_number'];
             $newCategory->save();
         }
+        return new VcardResource($vcard);
+    }
+
+    public function update_confirmation_code(UpdateUserCodeRequest $request, Vcard $vcard)
+    {
+        $vcard->confirmation_code = bcrypt($request->validated()['password']);
+        $vcard->save();
         return new VcardResource($vcard);
     }
 
