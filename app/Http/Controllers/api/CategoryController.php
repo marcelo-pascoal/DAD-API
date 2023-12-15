@@ -43,15 +43,23 @@ class CategoryController extends Controller
         return new CategoryResource($storedCategory);
     }
 
-    public function update(UpdateCategoryRequest $request, DefaultCategory $category)
+    public function update(UpdateCategoryRequest $request, Category $category)
     {
         $dataToSave = $request->validated();
-        $user = Auth::user();
-        if ($user && $user->user_type === 'V') {
-            $updatedCategory = Category::find($category->id);
-        } else {
-            $updatedCategory = DefaultCategory::find($category->id);
-        }
+        $updatedCategory = Category::find($category->id);
+
+        $updatedCategory->name = $dataToSave['name'];
+        $updatedCategory->type = $dataToSave['type'];
+        $updatedCategory->custom_data = json_encode(["icon" => $dataToSave['icon']]);
+        $updatedCategory->save();
+        return new CategoryResource($updatedCategory);
+    }
+
+    public function updateDefault(UpdateCategoryRequest $request, DefaultCategory $category)
+    {
+        $dataToSave = $request->validated();
+        
+        $updatedCategory = DefaultCategory::find($category->id);
 
         $updatedCategory->name = $dataToSave['name'];
         $updatedCategory->type = $dataToSave['type'];

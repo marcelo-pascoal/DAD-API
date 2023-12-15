@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests;
 
-use App\Services\Base64Services;
 use Illuminate\Validation\Rules\Password;
+use App\Http\Requests\UpdateVcardRequest;
 
-class StoreVcardRequest extends StoreUserRequest
+class StoreVcardRequest extends UpdateVcardRequest
 {
     public function authorize(): bool
     {
@@ -15,25 +15,10 @@ class StoreVcardRequest extends StoreUserRequest
     public function rules(): array
     {
         $rules = parent::rules();
+        unset($rules['deletePhotoOnServer']);
         return array_merge($rules, [
+            'password' => ['required', 'confirmed', Password::min(3)],
             'confirmation_code' => ['required', 'confirmed', Password::min(6)],
-            'phone_number' => ['required', 'regex:/^9\d{8}$/'],
-            'base64ImagePhoto' => 'nullable|string',
-            'deletePhotoOnServer' => 'nullable|boolean'
         ]);
-    }
-
-    public function withValidator($validator)
-    {
-        $validator->after(function ($validator) {
-            $base64ImagePhoto = $this->base64ImagePhoto ?? null;
-            if ($base64ImagePhoto) {
-                $base64Service = new Base64Services();
-                $mimeType = $base64Service->mimeType($base64ImagePhoto);
-                if (!in_array($mimeType, ['image/png', 'image/jpg', 'image/jpeg'])) {
-                    $validator->errors()->add('base64ImagePhoto', 'File type not supported (only supports "png" and "jpeg" images).');
-                }
-            }
-        });
     }
 }

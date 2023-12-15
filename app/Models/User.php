@@ -47,7 +47,7 @@ class User extends Authenticatable
 
     public function findForPassport(string $username): User
     {
-        return $this->where('email', $username)->first();
+        return $this->where('username', $username)->first();
     }
 
     public function vcard()

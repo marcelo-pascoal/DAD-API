@@ -12,6 +12,8 @@ use App\Services\Base64Services;
 use App\Http\Requests\StoreVcardRequest;
 use App\Http\Requests\UpdateVcardCodeRequest;
 use App\Http\Requests\DeleteVcardRequest;
+use App\Http\Requests\UpdateVcardRequest;
+use Illuminate\Support\Facades\Storage;
 
 class VcardController extends Controller
 {
@@ -35,6 +37,7 @@ class VcardController extends Controller
         $base64ImagePhoto = array_key_exists("base64ImagePhoto", $dataToSave) ?
             $dataToSave["base64ImagePhoto"] : ($dataToSave["base64ImagePhoto"] ?? null);
         unset($dataToSave["base64ImagePhoto"]);
+
         $vcard = new Vcard();
         $vcard->phone_number = $dataToSave['phone_number'];
         $vcard->name = $dataToSave['name'];
@@ -54,6 +57,7 @@ class VcardController extends Controller
             $newCategory = new Category();
             $newCategory->name = $defaultCategory->name;
             $newCategory->type = $defaultCategory->type;
+            $newCategory->custom_data = $defaultCategory->custom_data;
             $newCategory->vcard = $dataToSave['phone_number'];
             $newCategory->save();
         }
@@ -72,9 +76,30 @@ class VcardController extends Controller
         return new VcardResource($vcard);
     }
 
-    public function update(Request $request, Vcard $vcard)
+    public function update(UpdateVcardRequest $request, Vcard $vcard)
     {
-        $vcard->fill($request->all());
+        $dataToSave = $request->validated();
+
+        $base64ImagePhoto = array_key_exists("base64ImagePhoto", $dataToSave) ?
+            $dataToSave["base64ImagePhoto"] : ($dataToSave["base64ImagePhoto"] ?? null);
+        $deletePhotoOnServer = array_key_exists("deletePhotoOnServer", $dataToSave) && $dataToSave["deletePhotoOnServer"];
+        unset($dataToSave["base64ImagePhoto"]);
+        unset($dataToSave["deletePhotoOnServer"]);
+
+        $vcard->fill($dataToSave);
+
+        // Delete previous photo file if a new file is uploaded or the photo is to be deleted
+        if ($vcard->photo_url && ($deletePhotoOnServer || $base64ImagePhoto)) {
+            if (Storage::exists('public/fotos/' . $vcard->photo_url)) {
+                Storage::delete('public/fotos/' . $vcard->photo_url);
+            }
+            $vcard->photo_url = null;
+        }
+
+        // Create a new photo file from base64 content
+        if ($base64ImagePhoto) {
+            $vcard->photo_url = $this->storeBase64AsFile($vcard, $base64ImagePhoto);
+        }
         $vcard->save();
         return new VcardResource($vcard);
     }
