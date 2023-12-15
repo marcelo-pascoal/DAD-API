@@ -9,7 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\TransactionResource;
 use App\Http\Resources\FullTransactionResource;
 use App\Http\Requests\StoreUpdateTransactionRequest;
-
+use App\Http\Resources\VcardResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -34,16 +34,18 @@ class TransactionController extends Controller
             $user = Auth::user();
             $time = Carbon::now();
             $requestTransaction = Transaction::make($validData);
+
             if ($user && $user->user_type === 'V') {
                 $vcard = $user->vcard->lockForUpdate()->firstOrFail();
-            } else $vcard = Vcard::find($requestTransaction->vcard);
-            //DEVOLVER ERRO -> APRESENTAR TOAST NA APP
-            if ($vcard->balance < $requestTransaction->value) {
-                return response()->json('Transaction value exceeds vcard balance!', 401);
-            } else if ($vcard->max_debit < $requestTransaction->value) {
-                return response()->json('Transaction value exceeds vcard maximum debit value!', 401);
+                if ($vcard->balance < $requestTransaction->value) {
+                    return response()->json('Transaction value exceeds vcard balance!', 401);
+                } else if ($vcard->max_debit < $requestTransaction->value) {
+                    return response()->json('Transaction value exceeds vcard maximum debit value!', 401);
+                }
+            } else {
+                $vcard = Vcard::find($requestTransaction->vcard);
             }
-            $requestTransaction->vcard = $vcard->phone_number;
+
             $requestTransaction->date = $time->toDateString();
             $requestTransaction->datetime = $time->toDateTimeString();
             $requestTransaction->old_balance = $vcard->balance;
@@ -87,7 +89,7 @@ class TransactionController extends Controller
                         ]);
                         if (!$debitResponse->successful()) {
                             DB::rollback();
-                            return $debitResponse;
+                            return response($debitResponse, 491);
                         }
                         break;
                 }
@@ -99,7 +101,7 @@ class TransactionController extends Controller
                 ]);
                 if (!$creditResponse->successful()) {
                     DB::rollback();
-                    return $creditResponse;
+                    return response($creditResponse, 491);
                 }
             }
             $requestTransaction->save();
