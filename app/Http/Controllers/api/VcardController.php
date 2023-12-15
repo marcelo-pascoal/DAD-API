@@ -10,7 +10,8 @@ use Illuminate\Http\Request;
 use App\Http\Resources\VcardResource;
 use App\Services\Base64Services;
 use App\Http\Requests\StoreVcardRequest;
-use App\Http\Requests\UpdateUserCodeRequest;
+use App\Http\Requests\UpdateVcardCodeRequest;
+use App\Http\Requests\DeleteVcardRequest;
 
 class VcardController extends Controller
 {
@@ -21,7 +22,7 @@ class VcardController extends Controller
         $base64Service = new Base64Services();
         return $base64Service->saveFile($base64String, $targetDir, $newfilename);
     }
-    
+
     public function index()
     {
         $vcards = Vcard::all();
@@ -59,9 +60,9 @@ class VcardController extends Controller
         return new VcardResource($vcard);
     }
 
-    public function update_confirmation_code(UpdateUserCodeRequest $request, Vcard $vcard)
+    public function update_confirmation_code(UpdateVcardCodeRequest $request, Vcard $vcard)
     {
-        $vcard->confirmation_code = bcrypt($request->validated()['password']);
+        $vcard->confirmation_code = bcrypt($request->validated()['confirmation_code']);
         $vcard->save();
         return new VcardResource($vcard);
     }
@@ -78,7 +79,7 @@ class VcardController extends Controller
         return new VcardResource($vcard);
     }
 
-    public function destroy(Vcard $vcard)
+    public function destroy(DeleteVcardRequest $request, Vcard $vcard)
     {
         $vcard->delete();
         return new VcardResource($vcard);

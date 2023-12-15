@@ -2,12 +2,12 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Password;
 use App\Models\Vcard;
 use Illuminate\Support\Facades\Hash;
 
-class UpdateUserCodeRequest extends FormRequest
+use Illuminate\Foundation\Http\FormRequest;
+
+class DeleteVcardRequest extends FormRequest
 {
     public function authorize()
     {
@@ -17,8 +17,8 @@ class UpdateUserCodeRequest extends FormRequest
     public function rules()
     {
         return [
-            'password' => ['required', 'confirmed', Password::min(6), 'regex:/^[0-9]+$/'],
-            'current_password' => [
+
+            'confirmation_code' => [
                 'required',
                 function ($attribute, $value, $fail) {
                     $user = auth()->user();
@@ -28,7 +28,8 @@ class UpdateUserCodeRequest extends FormRequest
                         $fail('The current confirmation code is incorrect.');
                     }
                 },
-            ]
+            ],
+            'password' => 'required|current_password:api',
         ];
     }
 }
