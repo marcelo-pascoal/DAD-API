@@ -13,6 +13,7 @@ use App\Http\Requests\StoreVcardRequest;
 use App\Http\Requests\UpdateVcardCodeRequest;
 use App\Http\Requests\DeleteVcardRequest;
 use App\Http\Requests\UpdateVcardRequest;
+use App\Http\Requests\UpdateVcardAdminRequest;
 use Illuminate\Support\Facades\Storage;
 
 class VcardController extends Controller
@@ -73,6 +74,14 @@ class VcardController extends Controller
 
     public function show(Vcard $vcard)
     {
+        return new VcardResource($vcard);
+    }
+
+    public function update_admin(UpdateVcardAdminRequest $request, Vcard $vcard)
+    {
+        $dataToSave = $request->validated();
+        $vcard->fill($dataToSave);
+        $vcard->save();
         return new VcardResource($vcard);
     }
 

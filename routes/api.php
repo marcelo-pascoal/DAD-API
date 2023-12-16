@@ -24,25 +24,27 @@ Route::middleware('auth:api')->group(function () {
     Route::patch('users/{user}/password', [UserController::class, 'update_password'])
         ->middleware('can:updatePassword,user');
 
-	Route::get('/transactions/all', [TransactionController::class, 'allTransactions']);
-
-    Route::apiResource('vcards', VcardController::class);
-    Route::apiResource('users', UserController::class);
-    Route::apiResource('transactions', TransactionController::class);
-	
+    Route::get('vcards', [VcardController::class, 'index']);
+    Route::post('vcards', [VcardController::class, 'store']);
+    Route::put('vcards/{vcard}', [VcardController::class, 'update']);
+    Route::get('vcards/{vcard}', [VcardController::class, 'show']);
+    Route::delete('vcards/{vcard}', [VcardController::class, 'destroy']);
+    Route::patch('vcards/{vcard}/confirmation_code', [VcardController::class, 'update_confirmation_code']);
+    Route::put('update/vcards/{vcard}', [VcardController::class, 'update_admin']);
+    Route::patch('vcards/{vcard}/blocked', [VcardController::class, 'updateBlocked']);
 
     Route::get('categories', [CategoryController::class, 'index']);
-
-    Route::delete('categories/default/{category}', [CategoryController::class, 'destroyDefault']);
-    Route::delete('categories/{category}', [CategoryController::class, 'destroy']);
-
     Route::post('categories', [CategoryController::class, 'store']);
     Route::put('categories/{category}', [CategoryController::class, 'update']);
-	Route::put('categories/default/{category}', [CategoryController::class, 'updateDefault']);
-	
-	Route::patch('vcards/{vcard}/confirmation_code', [VcardController::class, 'update_confirmation_code']);
+    Route::delete('categories/{category}', [CategoryController::class, 'destroy']);
+    Route::put('categories/default/{category}', [CategoryController::class, 'updateDefault']);
+    Route::delete('categories/default/{category}', [CategoryController::class, 'destroyDefault']);
+
+    Route::get('/transactions/all', [TransactionController::class, 'allTransactions']);
+    Route::get('transactions', [TransactionController::class, 'index']);
+    Route::post('transactions', [TransactionController::class, 'store']);
+    Route::get('transactions/{transaction}', [TransactionController::class, 'show']);
+    Route::put('transactions/{transaction}', [CategoryController::class, 'update']);
 });
 
-
 Route::post('vcards', [VcardController::class, 'store']);
-Route::patch('vcards/{vcard}/blocked', [VcardController::class, 'updateBlocked']);
