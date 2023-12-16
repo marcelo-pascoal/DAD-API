@@ -10,7 +10,7 @@ class FullTransactionResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'vcard' => $this->vcard,
+		    'vcard' => $this->vcard,
             'id' => $this->id,
             'datetime' => $this->datetime,
             'type' => $this->type,
