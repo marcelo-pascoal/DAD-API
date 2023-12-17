@@ -8,14 +8,18 @@ class UserPolicy
 {
     public function view(User $user, User $model)
     {
-        return $user->type == "A" || $user->id == $model->id;
+        return $user->id == $model->id;
     }
     public function update(User $user, User $model)
     {
-        return $user->type == "A" || $user->id == $model->id;
+        return $user->id == $model->id;
     }
     public function updatePassword(User $user, User $model)
     {
         return $user->id == $model->id;
+    }
+    public function delete(User $user, User $model)
+    {
+        return $user->user_type == "A" && $model->user_type == "A";
     }
 }

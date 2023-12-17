@@ -30,9 +30,6 @@ class Kernel extends HttpKernel
      */
     protected $middlewareGroups = [
 
-        'check.user.admin' => [
-            \App\Http\Middleware\CheckUserAdmin::class,
-        ],
         'web' => [
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
@@ -48,7 +45,6 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
-
     /**
      * The application's middleware aliases.
      *

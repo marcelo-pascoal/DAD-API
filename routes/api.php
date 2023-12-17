@@ -17,34 +17,57 @@ Route::middleware('auth:api')->group(function () {
     Route::get('users/me', [UserController::class, 'show_me']);
 
     Route::get('users', [UserController::class, 'index']);
+
     Route::get('users/{user}', [UserController::class, 'show'])
         ->middleware('can:view,user');
     Route::put('users/{user}', [UserController::class, 'update'])
         ->middleware('can:update,user');
     Route::patch('users/{user}/password', [UserController::class, 'update_password'])
         ->middleware('can:updatePassword,user');
+    Route::delete('users/{user}', [UserController::class, 'destroy'])
+        ->middleware('can:delete,user');
 
-    Route::get('vcards', [VcardController::class, 'index']);
-    Route::post('vcards', [VcardController::class, 'store']);
-    Route::put('vcards/{vcard}', [VcardController::class, 'update']);
-    Route::get('vcards/{vcard}', [VcardController::class, 'show']);
-    Route::delete('vcards/{vcard}', [VcardController::class, 'destroy']);
-    Route::patch('vcards/{vcard}/confirmation_code', [VcardController::class, 'update_confirmation_code']);
-    Route::put('update/vcards/{vcard}', [VcardController::class, 'update_admin']);
-    Route::patch('vcards/{vcard}/blocked', [VcardController::class, 'updateBlocked']);
+
+
+    Route::get('vcards', [VcardController::class, 'index'])
+        ->middleware('can:admin,App\Models\Vcard');
+    Route::put('update/vcards/{vcard}', [VcardController::class, 'update_admin'])
+        ->middleware('can:admin,App\Models\Vcard');
+    Route::patch('vcards/{vcard}/blocked', [VcardController::class, 'updateBlocked'])
+        ->middleware('can:admin,App\Models\Vcard');
+    Route::get('vcards/{vcard}', [VcardController::class, 'show'])
+        ->middleware('can:view,vcard');
+    Route::put('vcards/{vcard}', [VcardController::class, 'update'])
+        ->middleware('can:update,vcard');
+    Route::patch('vcards/{vcard}/confirmation_code', [VcardController::class, 'update_confirmation_code'])
+        ->middleware('can:update,vcard');
+    Route::delete('vcards/{vcard}', [VcardController::class, 'destroy'])
+        ->middleware('can:delete,vcard');
 
     Route::get('categories', [CategoryController::class, 'index']);
     Route::post('categories', [CategoryController::class, 'store']);
-    Route::put('categories/{category}', [CategoryController::class, 'update']);
-    Route::delete('categories/{category}', [CategoryController::class, 'destroy']);
-    Route::put('categories/default/{category}', [CategoryController::class, 'updateDefault']);
-    Route::delete('categories/default/{category}', [CategoryController::class, 'destroyDefault']);
 
-    Route::get('/transactions/all', [TransactionController::class, 'allTransactions']);
-    Route::get('transactions', [TransactionController::class, 'index']);
+    Route::put('categories/{category}', [CategoryController::class, 'update'])
+        ->middleware('can:update,category');
+    Route::delete('categories/{category}', [CategoryController::class, 'destroy'])
+        ->middleware('can:delete,category');
+
+    Route::put('categories/default/{category}', [CategoryController::class, 'updateDefault'])
+        ->middleware('can:admin,App\Models\Category');
+    Route::delete('categories/default/{category}', [CategoryController::class, 'destroyDefault'])
+        ->middleware('can:admin,App\Models\Category');
+
+    Route::get('/transactions/all', [TransactionController::class, 'allTransactions'])
+        ->middleware('can:admin,App\Models\Transaction');
+    Route::get('transactions', [TransactionController::class, 'index'])
+        ->middleware('can:admin,App\Models\Transaction');
+
     Route::post('transactions', [TransactionController::class, 'store']);
-    Route::get('transactions/{transaction}', [TransactionController::class, 'show']);
-    Route::put('transactions/{transaction}', [CategoryController::class, 'update']);
+
+    Route::get('transactions/{transaction}', [TransactionController::class, 'show'])
+        ->middleware('can:view,transaction');
+    Route::put('transactions/{transaction}', [CategoryController::class, 'update'])
+        ->middleware('can:update,transaction');
 });
 
 Route::post('vcards', [VcardController::class, 'store']);
