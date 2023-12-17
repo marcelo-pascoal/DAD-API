@@ -60,7 +60,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/transactions/all', [TransactionController::class, 'allTransactions'])
         ->middleware('can:admin,App\Models\Transaction');
     Route::get('transactions', [TransactionController::class, 'index'])
-        ->middleware('can:admin,App\Models\Transaction');
+        ->middleware('can:check,App\Models\Transaction');
 
     Route::post('transactions', [TransactionController::class, 'store']);
 
