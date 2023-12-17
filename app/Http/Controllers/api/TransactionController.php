@@ -86,6 +86,9 @@ class TransactionController extends Controller
                     return response()->json('Transaction value exceeds vcard maximum debit value!', 401);
                 }
             } else {
+                if (!Vcard::find($requestTransaction->vcard)) {
+                    return response()->json(['errors' => ['destination_vcard' => ['Vcard does not exist!']]], 422);
+                }
                 $vcard = Vcard::find($requestTransaction->vcard);
             }
             $requestTransaction->date = $time->toDateString();
@@ -102,25 +105,28 @@ class TransactionController extends Controller
             if ($user && $user->user_type === 'V') {
                 switch ($requestTransaction->payment_type) {
                     case 'VCARD':
-                        if (Vcard::where('phone_number', $requestTransaction->payment_reference)->exists()) {
-                            return response()->json('Target vcard does not exist!', 401);
+                        if (!Vcard::where('phone_number', $requestTransaction->payment_reference)->exists()) {
+                            return response()->json(['errors' => ['reference' => ['Vcard does not exist!']]], 422);
                         }
                         $pairVcard = Vcard::where('phone_number', $requestTransaction->payment_reference)->lockForUpdate()->firstOrFail();
                         unset($validData['category_id']);
                         unset($validData['description']);
+                        unset($validData['type']);
                         $pairTransaction = Transaction::make($validData);
+                        $pairTransaction->type = 'C';
                         $pairTransaction->vcard = $pairVcard->phone_number;
                         $pairTransaction->date = $time->toDateString();
                         $pairTransaction->datetime = $time->toDateTimeString();
                         $pairTransaction->old_balance = $pairVcard->balance;
                         $pairTransaction->new_balance = $pairVcard->balance =
                             (string)((float) $pairVcard->balance + (float) $requestTransaction->value);
-                        $pairTransaction->pair_vcard = $requestTransaction->vcard;
-                        $pairTransaction->save();
-                        $requestTransaction->pair_transaction = $pairTransaction->id;
                         $requestTransaction->pair_vcard = $pairTransaction->vcard;
+                        $pairTransaction->pair_vcard = $requestTransaction->vcard;
                         $requestTransaction->save();
+                        $pairTransaction->save();
                         $pairTransaction->pair_transaction = $requestTransaction->id;
+                        $requestTransaction->pair_transaction = $pairTransaction->id;
+                        $requestTransaction->save();
                         $pairTransaction->save();
                         $pairVcard->save();
                         break;
