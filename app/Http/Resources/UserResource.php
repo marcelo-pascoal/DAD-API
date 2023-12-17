@@ -17,7 +17,6 @@ class UserResource extends JsonResource
 
         if ($this->user_type == 'V') {
             $userToArray['photo_url'] = $this->photo_url;
-            if ($this->vcard->blocked) $userToArray['blocked'] = $this->vcard->blocked;
         }
 
         return $userToArray;
