@@ -20,37 +20,67 @@ use Illuminate\Support\Facades\Http;
 class TransactionController extends Controller
 {
 
-	public function index(Request $request)
-	{
-		$user = Auth::user();
-		$vcard = $user->vcard;
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        $vcard = $user->vcard;
 
-		$query = $vcard->transactions()->orderBy('datetime', 'desc');
+        $query = $vcard->transactions()->orderBy('datetime', 'desc');
 
-		if ($request->has('type')) {
-			$query->where('type', $request->input('type'));
-		}
-		//isto tudo em baixo provavelmente pode ser removido
-		if ($request->has('pair_vcard')) {
-			$query->where('pair_vcard', $request->input('pair_vcard'));
-		}
+        if ($request->has('type')) {
+            $query->where('type', $request->input('type'));
+        }
+        //isto tudo em baixo provavelmente pode ser removido
+        if ($request->has('pair_vcard')) {
+            $query->where('pair_vcard', $request->input('pair_vcard'));
+        }
 
-		if ($request->has('min')) {
-			$query->where('value', '>=', $request->input('min'));
-		}
+        if ($request->has('min')) {
+            $query->where('value', '>=', $request->input('min'));
+        }
 
-		if ($request->has('max')) {
-			$query->where('value', '<=', $request->input('max'));
-		}
-		
-		if ($request->has('category_id')) {
-			$query->where('category_id', $request->input('category_id'));
-		}
+        if ($request->has('max')) {
+            $query->where('value', '<=', $request->input('max'));
+        }
 
-		return TransactionResource::collection($query->get());
-	}
+        if ($request->has('category_id')) {
+            $query->where('category_id', $request->input('category_id'));
+        }
 
-    public function allTransactions()
+        return TransactionResource::collection($query->get());
+    }
+
+    public function statistics(Request $request)
+    {
+        $user = Auth::user();
+        $vcard = $user->vcard;
+
+        $query = $vcard->transactions()->orderBy('datetime', 'desc');
+
+        if ($request->has('type')) {
+            $query->where('type', $request->input('type'));
+        }
+        //isto tudo em baixo provavelmente pode ser removido
+        if ($request->has('pair_vcard')) {
+            $query->where('pair_vcard', $request->input('pair_vcard'));
+        }
+
+        if ($request->has('min')) {
+            $query->where('value', '>=', $request->input('min'));
+        }
+
+        if ($request->has('max')) {
+            $query->where('value', '<=', $request->input('max'));
+        }
+
+        if ($request->has('category_id')) {
+            $query->where('category_id', $request->input('category_id'));
+        }
+
+        return TransactionResource::collection($query->get());
+    }
+
+    public function allStatistics()
     {
         $user = Auth::user();
 
@@ -70,7 +100,7 @@ class TransactionController extends Controller
             $user = Auth::user();
             $time = Carbon::now();
             $requestTransaction = Transaction::make($validData);
-			
+
             if ($user && $user->user_type === 'V') {
                 $vcard = $user->vcard->lockForUpdate()->firstOrFail();
                 if ($vcard->balance < $requestTransaction->value) {
@@ -80,17 +110,17 @@ class TransactionController extends Controller
                 }
             } else {
                 $vcard = Vcard::find($requestTransaction->vcard);
-			}
+            }
             $requestTransaction->date = $time->toDateString();
             $requestTransaction->datetime = $time->toDateTimeString();
             $requestTransaction->old_balance = $vcard->balance;
-		    if ($user && $user->user_type === 'V') {
-						$requestTransaction->new_balance = $vcard->balance =
-							(string)((float) $vcard->balance - (float) $requestTransaction->value);
-					} else {
-						$requestTransaction->new_balance = $vcard->balance =
-							(string)((float) $vcard->balance + (float) $requestTransaction->value);
-					}
+            if ($user && $user->user_type === 'V') {
+                $requestTransaction->new_balance = $vcard->balance =
+                    (string)((float) $vcard->balance - (float) $requestTransaction->value);
+            } else {
+                $requestTransaction->new_balance = $vcard->balance =
+                    (string)((float) $vcard->balance + (float) $requestTransaction->value);
+            }
 
             if ($user && $user->user_type === 'V') {
                 switch ($requestTransaction->payment_type) {
