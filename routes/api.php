@@ -57,11 +57,13 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('categories/default/{category}', [CategoryController::class, 'destroyDefault'])
         ->middleware('can:admin,App\Models\Category');
 
-    Route::get('/transactions/all', [TransactionController::class, 'allTransactions'])
+    Route::get('/statistics/all', [TransactionController::class, 'allStatistics'])
         ->middleware('can:admin,App\Models\Transaction');
-    Route::get('transactions', [TransactionController::class, 'index'])
+    Route::get('statistics', [TransactionController::class, 'statistics'])
         ->middleware('can:check,App\Models\Transaction');
 
+    Route::get('transactions', [TransactionController::class, 'index'])
+        ->middleware('can:check,App\Models\Transaction');
     Route::post('transactions', [TransactionController::class, 'store']);
 
     Route::get('transactions/{transaction}', [TransactionController::class, 'show'])

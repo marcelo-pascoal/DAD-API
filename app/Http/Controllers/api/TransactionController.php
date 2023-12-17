@@ -9,8 +9,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\TransactionResource;
 use App\Http\Resources\FullTransactionResource;
 use App\Http\Requests\StoreUpdateTransactionRequest;
-
-use App\Http\Resources\VcardResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -26,28 +24,7 @@ class TransactionController extends Controller
         $vcard = $user->vcard;
 
         $query = $vcard->transactions()->orderBy('datetime', 'desc');
-
-        if ($request->has('type')) {
-            $query->where('type', $request->input('type'));
-        }
-        //isto tudo em baixo provavelmente pode ser removido
-        if ($request->has('pair_vcard')) {
-            $query->where('pair_vcard', $request->input('pair_vcard'));
-        }
-
-        if ($request->has('min')) {
-            $query->where('value', '>=', $request->input('min'));
-        }
-
-        if ($request->has('max')) {
-            $query->where('value', '<=', $request->input('max'));
-        }
-
-        if ($request->has('category_id')) {
-            $query->where('category_id', $request->input('category_id'));
-        }
-
-        return TransactionResource::collection($query->get());
+        return TransactionResource::collection($query->paginate(7));
     }
 
     public function statistics(Request $request)
