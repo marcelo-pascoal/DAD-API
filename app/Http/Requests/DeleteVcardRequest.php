@@ -38,7 +38,7 @@ class DeleteVcardRequest extends FormRequest
                     $user = auth()->user();
                     if ($user->user_type == 'V') {
                         $validator = Validator::make(['password' => $value], [
-                            'password' => 'required|current_password:api',
+                            'password' => ['required','current_password:api'],
                         ]);
                         if ($validator->fails()) {
                             $fail($validator->errors()->first('password'));

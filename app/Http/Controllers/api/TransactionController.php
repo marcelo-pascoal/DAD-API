@@ -80,12 +80,13 @@ class TransactionController extends Controller
     {
         $user = Auth::user();
 
-        if ($user && $user->user_type === 'A') {
-            $transactions = Transaction::all();
-            return TransactionResource::collection($transactions);
-        } else {
-            abort(403, 'Unauthorized');
-        }
+        $firstDayOfMonth = Carbon::now()->firstOfMonth();
+        $lastDayOfMonth = Carbon::now()->lastOfMonth();
+
+        $transactions = Transaction::whereBetween('datetime', [$firstDayOfMonth, $lastDayOfMonth])
+            ->get();
+
+        return TransactionResource::collection($transactions);
     }
 
     public function store(StoreUpdateTransactionRequest $request)

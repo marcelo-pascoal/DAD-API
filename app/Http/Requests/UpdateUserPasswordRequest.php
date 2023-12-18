@@ -16,7 +16,7 @@ class UpdateUserPasswordRequest extends FormRequest
     {
         return [
             'password' => ['required', 'confirmed', Password::min(3)],
-            'current_password' => 'current_password:api',
+            'password' => ['required','current_password:api'],
         ];
     }
 }

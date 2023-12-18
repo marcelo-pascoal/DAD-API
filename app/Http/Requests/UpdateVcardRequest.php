@@ -20,6 +20,7 @@ class UpdateVcardRequest extends FormRequest
             'phone_number' => ['required', 'regex:/^9\d{8}$/'],
             'base64ImagePhoto' => 'nullable|string',
             'deletePhotoOnServer' => 'nullable|boolean',
+            'password' => ['required','current_password:api'],
         ];
     }
 

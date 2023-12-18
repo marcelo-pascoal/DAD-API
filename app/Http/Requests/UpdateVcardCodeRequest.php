@@ -17,7 +17,7 @@ class UpdateVcardCodeRequest extends FormRequest
         return [
 
             'confirmation_code' => ['required', 'confirmed', Password::min(6), 'regex:/^[0-9]+$/'],
-            'current_password' => 'current_password:api',
+            'password' => ['required','current_password:api'],
         ];
     }
 }
