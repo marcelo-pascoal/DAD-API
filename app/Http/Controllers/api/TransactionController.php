@@ -22,8 +22,27 @@ class TransactionController extends Controller
     {
         $user = Auth::user();
         $vcard = $user->vcard;
-
         $query = $vcard->transactions()->orderBy('datetime', 'desc');
+
+        if ($request->has('type')) {
+            $query->where('type', $request->input('type'));
+        }
+        if ($request->has('pair_vcard')) {
+            $query->where('pair_vcard', $request->input('pair_vcard'));
+        }
+
+        if ($request->has('min')) {
+            $query->where('value', '>=', $request->input('min'));
+        }
+
+        if ($request->has('max')) {
+            $query->where('value', '<=', $request->input('max'));
+        }
+
+        if ($request->has('category_id')) {
+            $query->where('category_id', $request->input('category_id'));
+        }
+
         return TransactionResource::collection($query->paginate(7));
     }
 
